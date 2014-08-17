@@ -9,6 +9,7 @@ module QuerySyntax
       @ignore_failure = true
     end
 
+    attr_reader :index
     attr_accessor :ignore_failure
 
     #
