@@ -27,7 +27,7 @@ module QuerySyntax
     def scope!(operator)
       scope = CriteriaScope.new(operator)
       scopes << scope
-      scope
+      self
     end
 
     def nest!(operator)
@@ -61,7 +61,8 @@ module QuerySyntax
     # Return the last scope so that we can continue adding to it
     #
     def scope
-      scope!(operator) if @scopes.empty?
+      scope!(operator)  if @scopes.empty?
+      scope!("AND")     if @scopes.last.is_a?(NestedScope)
       @scopes.last
     end
 
