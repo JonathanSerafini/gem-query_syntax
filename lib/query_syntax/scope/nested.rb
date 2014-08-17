@@ -18,9 +18,6 @@ module QuerySyntax
 
     attr_accessor :scopes
     
-    def_delegators(:@scopes, 
-      *(Array.instance_methods - Object.instance_methods))
-
     #
     # Return a new CriteriaScope which is added to previous scopes
     #
@@ -32,7 +29,6 @@ module QuerySyntax
 
     def nest!(operator)
       @scopes = [NestedScope.new(operator, *scopes)]
-      scope!(operator)
       self
     end
 
@@ -99,7 +95,7 @@ module QuerySyntax
     end
 
     def push(other)
-      scopes << other
+      @scopes << other
       scope!(operator)
       self
     end
@@ -117,7 +113,7 @@ module QuerySyntax
         [scope.operator, value]
       end
 
-      values = values.flatten
+      values = values.flatten.compact
       values.shift
       values.join(" ")
     end
