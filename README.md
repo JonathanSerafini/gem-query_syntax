@@ -55,6 +55,8 @@ Query.where!(a:0,b:1).where!(a:2,b:2).and!(a:2,b:2).to_s
 
 `.push(object)` may be used to begin with a baseline and build on top of it.
 
+# Examples
+```
 # Create a baseline query
 Chef::Search.add_query("base")
 Chef::Search.base.
