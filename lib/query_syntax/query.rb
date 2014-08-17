@@ -14,21 +14,11 @@ module QuerySyntax
     #
     # Spawn! returns a clone to continue processing without mucking self
     #
-    def spawn!(operator="AND", nested=false)
+    def spawn(operator="AND")
       scope = clone
-      scope.scopes =  if nested
-                        [NestedScope.new(operator, *scopes)]
-                      else scopes.clone
-                      end
+      scope.scopes = scopes.clone
       scope.scope!(operator)
       scope
-    end
-
-    #
-    # Spawn returns a clone with self as a scope for nesting purposes
-    #
-    def spawn(operator="AND")
-      spawn!(operator, true)
     end
 
     #
@@ -36,24 +26,23 @@ module QuerySyntax
     #
 
     def where(args={})
-      if args.nil? or args.empty? then spawn("AND")
-      else spawn("AND").where!(args)
-      end
+      scope = spawn("AND")
+      scope.where!(args) if args
     end
 
     def not(args={})
       scope = spawn("NOT")
-      scope.where!(args)
+      scope.not!(args)
     end
 
     def and(args={})
       scope = spawn("AND")
-      scope.where!(args)
+      scope.and!(args)
     end
 
     def or(args={})
       scope = spawn("OR")
-      scope.where!(args)
+      scope.or!(args)
     end
 
     #

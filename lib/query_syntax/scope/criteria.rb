@@ -35,10 +35,12 @@ module QuerySyntax
     # Collapse all conditions to a string
     #
     def to_s
-      @conditions.map do |key,values|
+      value = @conditions.map do |key,values|
         query = values.map { |value| "#{key}:#{value}" }.join(" OR ")
         values.count > 1 ? "(#{query})" : query
       end.join(" AND ")
+
+      conditions.count > 1 ? "(#{value})" : value
     end
   end
 end

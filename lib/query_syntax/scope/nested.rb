@@ -1,4 +1,5 @@
 
+require 'forwardable'
 require 'query_syntax/scope'
 require 'query_syntax/scope/criteria'
 
@@ -8,12 +9,17 @@ module QuerySyntax
   #
 
   class NestedScope < Scope
+    extend Forwardable
+    
     def initialize(operator, *scopes)
       super operator
       @scopes = scopes
     end
 
     attr_accessor :scopes
+    
+    def_delegators(:@scopes, 
+      *(Array.instance_methods - Object.instance_methods))
 
     #
     # Return a new CriteriaScope which is added to previous scopes
@@ -24,26 +30,38 @@ module QuerySyntax
       scope
     end
 
+    def nest!(operator)
+      @scopes = [NestedScope.new(operator, *scopes)]
+      scope!(operator)
+      self
+    end
+
     def not!(args={})
-      scope!("NOT")
-      where!(args)
+      if args.empty? then nest!("NOT")
+      else scope!("NOT").where!(args)
+      end
+      self
     end
 
     def and!(args={})
-      scope!("AND")
-      where!(args)
+      if args.empty? then nest!("AND")
+      else scope!("AND").where!(args)
+      end
+      self
     end
 
     def or!(args={})
-      scope!("OR")
-      where!(args)
+      if args.empty? then nest!("OR")
+      else scope!("OR").where!(args)
+      end
+      self
     end
 
     #
     # Return the last scope so that we can continue adding to it
     #
     def scope
-      scope!("AND") if @scopes.empty?
+      scope!(operator) if @scopes.empty?
       @scopes.last
     end
 
@@ -63,15 +81,39 @@ module QuerySyntax
     end
 
     #
+    # Convenience
+    #
+
+    def empty?
+      compact.empty?
+    end
+
+    def compact
+      scopes.reject { |scope| scope.empty? }
+    end
+
+    def compact!
+      scopes = compact
+      self
+    end
+
+    def push(other)
+      scopes << other
+      scope!(operator)
+      self
+    end
+
+    #
     # Collapse all scopes to a string
     #
     def to_s
-      values = scopes.map do |scope|
-        operator = scope.operator
+      values = compact.map do |scope|
         value = scope.to_s
-        next if value.empty?
-        value = scope.is_a?(NestedScope) ? "(#{value})" : value
-        [operator, value]
+        value = if scope.is_a?(NestedScope)
+                  scope.compact.count > 1 ? "(#{value})" : value
+                else value
+                end
+        [scope.operator, value]
       end
 
       values = values.flatten
