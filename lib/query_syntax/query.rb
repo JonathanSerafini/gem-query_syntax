@@ -77,7 +77,7 @@ module QuerySyntax
 
       begin
         if Kernel.block_given?
-          Chef::PartialSearc.new.search(index, encode, keys:keys, &block)
+          Chef::PartialSearch.new.search(index, encode, keys:keys, &block)
         else
           results = Array.new
           partial(keys) { |result| results << result }
