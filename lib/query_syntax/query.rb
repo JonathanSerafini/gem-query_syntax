@@ -69,7 +69,7 @@ module QuerySyntax
 
     def partial(keys, &block)
       keys = Hash[keys.map { |k,v| [k,Array(v)] }]
-      Chef::Search::Query.new.search(filter_result: keys, &block)
+      search(filter_result: keys, &block)
     end
 
     def each(&block)
