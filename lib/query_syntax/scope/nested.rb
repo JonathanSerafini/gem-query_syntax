@@ -96,7 +96,6 @@ module QuerySyntax
 
     def push(other)
       @scopes << other
-      scope!(operator)
       self
     end
 

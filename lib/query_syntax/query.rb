@@ -53,15 +53,9 @@ module QuerySyntax
       URI.escape(to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
     end
 
-    def search(&block)
+    def search(*args, &block)
       begin
-        if Kernel.block_given?
-          Chef::Search::Query.new.search(index, encode, &block)
-        else 
-          results = Array.new
-          search { |result| results << result }
-          results
-        end
+        Chef::Search::Query.new.search(index, encode, args, &block)
       rescue Net::HTTPServerException => e
         error = Chef::JSONCompat.from_json(e.response.body)["error"].first
         Chef::Log.error("Search failed with : #{error}")
@@ -75,24 +69,7 @@ module QuerySyntax
 
     def partial(keys, &block)
       keys = Hash[keys.map { |k,v| [k,Array(v)] }]
-
-      begin
-        if Kernel.block_given?
-          Chef::PartialSearch.new.search(index, encode, keys:keys, &block)
-        else
-          results = Array.new
-          partial(keys) { |result| results << result }
-          results
-        end
-      rescue Net::HTTPServerException => e
-        error = Chef::JSONCompat.from_json(e.response.body)["error"].first
-        Chef::Log.error("Search failed with : #{error}")
-
-        if @ignore_failure
-        then Array.new
-        else raise Net::HTTPServerException
-        end
-      end
+      Chef::Search::Query.new.search(filter_result: keys, &block)
     end
 
     def each(&block)
