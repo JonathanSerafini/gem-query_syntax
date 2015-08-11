@@ -16,6 +16,8 @@ Or install it yourself as:
 
     $ gem install query_syntax
 
+** NOTE ** Updated, as of 1.0.4 only compatible with newer chefs with filter_results
+
 ## Usage
 
 QuerySyntax::Query provides bang and non-bang methods for and, or, not, where which determine whether we are modifying the current object or whether we are returning a new object. In most cases though, QuerySyntax will return the QuerySyntax object so that we can chain at will.
